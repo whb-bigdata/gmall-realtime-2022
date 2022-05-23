@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+<configuration>
+
+<!-- Site specific YARN configuration properties -->
+  <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+</property>
+     <!-- 指定ResourceManager的地址-->
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>hadoop101</value>
+</property>
+<!-- 环境变量的继承 -->
+    <property>
+        <name>yarn.nodemanager.env-whitelist</name>
+        <value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_MAPRED_HOME</value>
+</property>
+<!--配置日志聚集日志聚集概念：应用运行完成以后，将程序运行日志信息上传到HDFS系统上-->   
+<property>
+        <name>yarn.log-aggregation-enable</name>
+        <value>true</value>
+</property>
+
+<!--配置日志聚集，设置到历史服务器所在的服务器上面--> 
+    <property>  
+        <name>yarn.log.server.url</name>  
+        <value>http://hadoop102:19888/jobhistory/logs</value>  
+    </property> 
+    <property>
+        <name>yarn.log-aggregation.retain-seconds</name>
+        <value>604800</value>
+</property>
+<!--  取消虚拟内存的限制 -->
+<property>
+  <name>yarn.nodemanager.vmem-check-enabled</name>
+  <value>false</value>
+</property>
+
+
+</configuration>
