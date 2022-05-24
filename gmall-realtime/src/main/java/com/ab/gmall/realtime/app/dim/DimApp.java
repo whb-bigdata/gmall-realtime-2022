@@ -1,22 +1,23 @@
 package com.ab.gmall.realtime.app.dim;
 
+import com.ab.gmall.realtime.app.func.DimSinkFunction;
+import com.ab.gmall.realtime.app.func.TableProcessFunction;
+import com.ab.gmall.realtime.bean.TableProcess;
 import com.ab.gmall.realtime.util.MyKafkaUtil;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.flink.api.common.restartstrategy.RestartStrategies;
-import org.apache.flink.api.common.time.Time;
-import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
-import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.environment.CheckpointConfig;
+import com.ververica.cdc.connectors.mysql.source.MySqlSource;
+import com.ververica.cdc.connectors.mysql.table.StartupOptions;
+import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 
-import java.util.concurrent.TimeUnit;
 
 public class DimApp {
     public static void main(String[] args) throws Exception {
@@ -62,9 +63,36 @@ public class DimApp {
         });
 
         // 打印测试
-        jsonObjDS.print("filterDS >>> ");
-        DataStream<String> sideOutput = jsonObjDS.getSideOutput(dirtyDataTag);
-        sideOutput.print("DIRTY >>> ");
+//        jsonObjDS.print("filterDS >>> ");
+//        DataStream<String> sideOutput = jsonObjDS.getSideOutput(dirtyDataTag);
+//        sideOutput.print("DIRTY >>> ");
+        //todo 5.使用flinkcdc读取Mysql中的配置信息
+        MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
+                .hostname("hadoop100")
+                .port(3306)
+                .username("root")
+                .password("123456")
+                .databaseList("gmall_config")
+                .tableList("gmall_config.table_process")
+                .deserializer( new JsonDebeziumDeserializationSchema())
+                .startupOptions(StartupOptions.initial())
+                .build();
+        DataStreamSource<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource");
+        mysqlSource.print();
+        //todo 6.将配置信息处理成广播流
+        MapStateDescriptor<String, TableProcess> mapStateDescriptor = new MapStateDescriptor<>("map-state", String.class, TableProcess.class);
+        BroadcastStream<String> broadcastStream = mysqlSource.broadcast(mapStateDescriptor);
+
+        //todo 7.连接主流和广播流
+        BroadcastConnectedStream<JSONObject, String> connectStream = jsonObjDS.connect(broadcastStream);
+
+        //todo 8.根据广播流数据处理主流数据
+        SingleOutputStreamOperator<JSONObject> hbaseDS = connectStream.process(new TableProcessFunction(mapStateDescriptor));
+
+        //TODO 8.将数据写出到Phoenix中
+        hbaseDS.print(">>>>>>>>>>>>>");
+        hbaseDS.addSink(new DimSinkFunction());
+
         env.execute();
 
     }
