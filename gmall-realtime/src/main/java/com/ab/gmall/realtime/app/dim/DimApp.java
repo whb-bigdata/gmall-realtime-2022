@@ -11,12 +11,19 @@ import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.api.common.time.Time;
+import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
+import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.*;
+import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
+
+import java.util.concurrent.TimeUnit;
 
 
 public class DimApp {
@@ -25,19 +32,19 @@ public class DimApp {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         //多并行度。导致后面每个分区都会建表一次
         env.setParallelism(1);//生成环境设置成kafka主题的分区数
-//        // todo 2. 状态后端设置
-//        env.enableCheckpointing(3000L, CheckpointingMode.EXACTLY_ONCE);
-//        env.getCheckpointConfig().setCheckpointTimeout(60 * 1000L);
-//        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(3000L);
-//        env.getCheckpointConfig().enableExternalizedCheckpoints(
-//                CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION
-//        );
-//        env.setRestartStrategy(RestartStrategies.failureRateRestart(
-//                10, Time.of(1L, TimeUnit.DAYS), Time.of(3L, TimeUnit.MINUTES)
-//        ));
-//        env.setStateBackend(new HashMapStateBackend());
-//        env.getCheckpointConfig().setCheckpointStorage("hdfs://hadoop100:9820/gmall/ck");
-//        System.setProperty("HADOOP_USER_NAME", "root");
+        // todo 2. 状态后端设置
+        env.enableCheckpointing(3000L, CheckpointingMode.EXACTLY_ONCE);
+        env.getCheckpointConfig().setCheckpointTimeout(60 * 1000L);
+        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(3000L);
+        env.getCheckpointConfig().enableExternalizedCheckpoints(
+                CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION
+        );
+        env.setRestartStrategy(RestartStrategies.failureRateRestart(
+                10, Time.of(1L, TimeUnit.DAYS), Time.of(3L, TimeUnit.MINUTES)
+        ));
+        env.setStateBackend(new HashMapStateBackend());
+        env.getCheckpointConfig().setCheckpointStorage("hdfs://hadoop100:9820/gmall/ck");
+        System.setProperty("HADOOP_USER_NAME", "root");
         //todo 3.读取业务
         String topic = "maxwell";
         String groupId = "dim_app_2205";
