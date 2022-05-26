@@ -23,7 +23,8 @@ public class DimApp {
     public static void main(String[] args) throws Exception {
         //todo 1.获取执行环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(3);//生成环境设置成kafka主题的分区数
+        //多并行度。导致后面每个分区都会建表一次
+        env.setParallelism(1);//生成环境设置成kafka主题的分区数
 //        // todo 2. 状态后端设置
 //        env.enableCheckpointing(3000L, CheckpointingMode.EXACTLY_ONCE);
 //        env.getCheckpointConfig().setCheckpointTimeout(60 * 1000L);
@@ -64,7 +65,7 @@ public class DimApp {
 
         // 打印测试
 //        jsonObjDS.print("filterDS >>> ");
-//        DataStream<String> sideOutput = jsonObjDS.getSideOutput(dirtyDataTag);
+        DataStream<String> sideOutput = jsonObjDS.getSideOutput(dirtyDataTag);
 //        sideOutput.print("DIRTY >>> ");
         //todo 5.使用flinkcdc读取Mysql中的配置信息
         MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
@@ -78,19 +79,19 @@ public class DimApp {
                 .startupOptions(StartupOptions.initial())
                 .build();
         DataStreamSource<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource");
-        mysqlSource.print();
+//        mysqlSource.print("cdc读取>>>>>>>>>>>>>>");
         //todo 6.将配置信息处理成广播流
         MapStateDescriptor<String, TableProcess> mapStateDescriptor = new MapStateDescriptor<>("map-state", String.class, TableProcess.class);
         BroadcastStream<String> broadcastStream = mysqlSource.broadcast(mapStateDescriptor);
-
-        //todo 7.连接主流和广播流
+//
+//        //todo 7.连接主流和广播流
         BroadcastConnectedStream<JSONObject, String> connectStream = jsonObjDS.connect(broadcastStream);
-
-        //todo 8.根据广播流数据处理主流数据
+//
+//        //todo 8.根据广播流数据处理主流数据
         SingleOutputStreamOperator<JSONObject> hbaseDS = connectStream.process(new TableProcessFunction(mapStateDescriptor));
-
-        //TODO 8.将数据写出到Phoenix中
-        hbaseDS.print(">>>>>>>>>>>>>");
+//
+//        //TODO 8.将数据写出到Phoenix中
+//        hbaseDS.print("写出到Phoenix>>>>>>>>>>>>>");
         hbaseDS.addSink(new DimSinkFunction());
 
         env.execute();

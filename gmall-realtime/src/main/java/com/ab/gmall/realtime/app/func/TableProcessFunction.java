@@ -5,6 +5,7 @@ import com.ab.gmall.realtime.common.GmallConfig;
 import com.ab.gmall.realtime.util.PhoenixUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.flink.api.common.state.BroadcastState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.state.ReadOnlyBroadcastState;
 import org.apache.flink.configuration.Configuration;
@@ -40,7 +41,15 @@ public class TableProcessFunction extends BroadcastProcessFunction<JSONObject,St
         JSONObject jsonObject = JSON.parseObject(s);
         TableProcess tableProcess = JSON.parseObject(jsonObject.getString("after"), TableProcess.class);
         //todo 2.校验表是否存在，如果不存在则建表
-        checkTable(tableProcess.getSinkTable(),tableProcess.getSinkColumns(),tableProcess.getSinkPk(),tableProcess.getSinkExtend());
+        System.out.println("开始校验表是否存在" + tableProcess );
+        if(tableProcess != null){
+        checkTable(tableProcess.getSinkTable(),tableProcess.getSinkColumns(),tableProcess.getSinkPk(),tableProcess.getSinkExtend());}
+        System.out.println("校验表是否存在结束");
+
+        //todo 3.将数据写入状态
+        String key = tableProcess.getSourceTable();
+        BroadcastState<String, TableProcess> broadcastState = context.getBroadcastState(stateDescriptor);
+        broadcastState.put(key, tableProcess);
 
     }
     //在Phoenix中校验并建表 create table if not exists db.tn(id varchar primary key,name varchar,....) xxx
@@ -75,12 +84,13 @@ public class TableProcessFunction extends BroadcastProcessFunction<JSONObject,St
                 }
             }
             sql.append(")").append(sinkExtend);
-            System.out.println(sql);
             //预编译SQL
+            System.out.println("完成sql ：" + sql);
             preparedStatement = connection.prepareStatement(sql.toString());
 
             //执行
             preparedStatement.execute();
+            System.out.println("创建完成：" + sql);
         } catch (SQLException e) {
             throw new RuntimeException("建表" + sinkTable + "失败！");
         } finally {
@@ -101,11 +111,14 @@ public class TableProcessFunction extends BroadcastProcessFunction<JSONObject,St
         ReadOnlyBroadcastState<String, TableProcess> broadcastState = readOnlyContext.getBroadcastState(stateDescriptor);
         TableProcess tableProcess = broadcastState.get(jsonObject.getString("table"));
         String type = jsonObject.getString("type");
+//        System.out.println("维表变动类型" + type);
+//        System.out.println(tableProcess + "更新的表为" + jsonObject.getString("table"));
         if(tableProcess != null && ("bootstrap-insert".equals(type) || "insert".equals(type) || "update".equals(type))){
             //2.根据sinkTable配置信息过滤字段
             filter(jsonObject.getJSONObject("data"),tableProcess.getSinkColumns());
             //3.补充sinkTable字段写出
             jsonObject.put("sinkTable",tableProcess.getSinkTable());
+            System.out.println(jsonObject);
             collector.collect(jsonObject);
         }
 
@@ -119,7 +132,7 @@ public class TableProcessFunction extends BroadcastProcessFunction<JSONObject,St
     private void filter(JSONObject data, String sinkColumns) {
         String[] split = sinkColumns.split(",");
         List<String> columnsList = Arrays.asList(split);
-        data.entrySet().removeIf(co -> columnsList.contains(co.getKey()));
+        data.entrySet().removeIf(co -> !columnsList.contains(co.getKey()));
 
     }
 

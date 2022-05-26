@@ -41,16 +41,16 @@ public class PhoenixUtil {
             }
         }
         //获取字段名
-        Set<String> columns = data.keySet();
+        Set<String> columns = data.getJSONObject("data").keySet();
         //获取字段对应的值
-        Collection<Object> values = data.values();
+        Collection<Object> values = data.getJSONObject("data").values();
         //拼接字段名
         String cloumnStr = StringUtils.join(columns, ",");
         //拼接字段值
-        String valueStr = StringUtils.join(values, ",");
+        String valueStr = StringUtils.join(values, "','");
         //拼接插入语句
-        String sql = "upsert into " + GmallConfig.HBASE_SCHEMA + "." + sinkTable + "(" + cloumnStr + "') values ('"
-                        + valueStr + ")";
+        String sql = "upsert into " + GmallConfig.HBASE_SCHEMA + "." + sinkTable + "(" + cloumnStr + ") values ('"
+                        + valueStr + "')";
         PreparedStatement preparedStatement = null;
         try{
             System.out.println("插入语句为：" + sql);
