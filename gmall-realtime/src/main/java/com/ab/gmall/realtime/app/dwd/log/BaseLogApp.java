@@ -163,7 +163,7 @@ public class BaseLogApp {
         });
         //todo 7.将数据输出到kafka的不同主题
         //测试输出
-//        separatedStream.print("page>>>>>>>>>>>");
+        separatedStream.print("page>>>>>>>>>>>");
 //        separatedStream.getSideOutput(startTag).print("start>>>>>>>>>>");
 //        separatedStream.getSideOutput(displayTag).print("display>>>>>>>>>>");
 //        separatedStream.getSideOutput(actionTag).print("action>>>>>>>>>>");
