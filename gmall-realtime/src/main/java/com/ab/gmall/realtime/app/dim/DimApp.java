@@ -46,7 +46,7 @@ public class DimApp {
         env.getCheckpointConfig().setCheckpointStorage("hdfs://hadoop100:9820/gmall/ck");
         System.setProperty("HADOOP_USER_NAME", "root");
         //todo 3.读取业务
-        String topic = "maxwell";
+        String topic = "topic_db";
         String groupId = "dim_app_2205";
         DataStreamSource<String> gmallDS  = env.addSource(MyKafkaUtil.getKafkaConsumer(topic, groupId));
         //todo 4.主流ETL，过滤非JSON格式的数据写入侧输出，过滤内容不是数据的

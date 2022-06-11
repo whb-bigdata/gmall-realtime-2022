@@ -88,13 +88,13 @@ public class MyKafkaUtil {
      * @return
      */
     public static String getTopicDbDDL(String groupId) {
-        return "CREATE TABLE maxwell ( " +
+        return "CREATE TABLE topic_db ( " +
                 "  `database` String, " +
                 "  `table` String, " +
                 "  `type` String, " +
                 "  `data` Map<String,String>, " +
                 "  `old` Map<String,String>, " +
                 "  `pt` AS PROCTIME() " +
-                ")" + MyKafkaUtil.getKafkaDDL("maxwell", groupId);
+                ")" + MyKafkaUtil.getKafkaDDL("topic_db", groupId);
     }
 }

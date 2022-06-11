@@ -42,7 +42,7 @@ public class DwdTradeOrderDetail {
                 "    data['split_activity_amount'] split_activity_amount, " +
                 "    data['split_coupon_amount'] split_coupon_amount, " +
                 "    pt " +
-                "from maxwell " +
+                "from topic_db " +
                 "where `database`='gmall' " +
                 "and `table`='order_detail' " +
                 "and `type`='insert'");
@@ -72,7 +72,7 @@ public class DwdTradeOrderDetail {
                 "    data['feight_fee_reduce'] feight_fee_reduce, " +
                 "    `type`, " +
                 "    `old` " +
-                "from maxwell " +
+                "from topic_db " +
                 "where `database`='gmall' " +
                 "and `table`='order_info' " +
                 "and (`type`='insert' or `type`='update')");
@@ -89,7 +89,7 @@ public class DwdTradeOrderDetail {
                 "    data['activity_rule_id'] activity_rule_id, " +
                 "    data['sku_id'] sku_id, " +
                 "    data['create_time'] create_time " +
-                "from maxwell " +
+                "from topic_db " +
                 "where `database`='gmall' " +
                 "and `table`='order_detail_activity' " +
                 "and `type`='insert'");
@@ -105,7 +105,7 @@ public class DwdTradeOrderDetail {
                 "    data['coupon_use_id'] coupon_use_id, " +
                 "    data['sku_id'] sku_id, " +
                 "    data['create_time'] create_time " +
-                "from maxwell " +
+                "from topic_db " +
                 "where `database`='gmall' " +
                 "and `table`='order_detail_coupon' " +
                 "and `type`='insert'");

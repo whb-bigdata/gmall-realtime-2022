@@ -62,7 +62,7 @@ public class DwdTradeCartAdd {
                 "    data['source_type'] source_type, " +
                 "    data['source_id'] source_id, " +
                 "    pt " +
-                "from maxwell " +
+                "from topic_db " +
                 "where `database`='gmall' " +
                 "and `table`='cart_info' " +
                 "and (`type`='insert'  " +
