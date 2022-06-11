@@ -7,7 +7,7 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 import java.time.Duration;
-
+//订单所有状态都在里面
 public class DwdTradeOrderDetail {
     public static void main(String[] args) throws Exception {
         //todo 获取执行环境
