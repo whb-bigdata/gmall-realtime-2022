@@ -131,7 +131,9 @@ public class DwsTrafficPageViewWindow {
         });
 
         //todo 开窗，聚合
-        DataStream<TrafficHomeDetailPageViewBean> reduceDS = trafficHomeDetailDS.windowAll(TumblingEventTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.seconds(10))).reduce(new ReduceFunction<TrafficHomeDetailPageViewBean>() {
+        DataStream<TrafficHomeDetailPageViewBean> reduceDS = trafficHomeDetailDS
+                .windowAll(TumblingEventTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.seconds(10)))
+                .reduce(new ReduceFunction<TrafficHomeDetailPageViewBean>() {
             @Override
             public TrafficHomeDetailPageViewBean reduce(TrafficHomeDetailPageViewBean value1, TrafficHomeDetailPageViewBean value2) throws Exception {
                 value1.setHomeUvCt(value1.getHomeUvCt() + value2.getHomeUvCt());
