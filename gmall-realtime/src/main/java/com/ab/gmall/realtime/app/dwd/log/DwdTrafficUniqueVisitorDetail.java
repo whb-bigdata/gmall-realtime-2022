@@ -76,7 +76,7 @@ public class DwdTrafficUniqueVisitorDetail {
         //todo 将数据写到kafka中
         uvDetailDS.print(">>>>>>>>>>>>>>");
         String targetTopic = "dwd_traffic_unique_visitor_detail";
-//        uvDetailDS.map(JSONAware::toJSONString).addSink(MyKafkaUtil.getKafkaProducer(targetTopic));
+        uvDetailDS.map(JSONAware::toJSONString).addSink(MyKafkaUtil.getKafkaProducer(targetTopic));
 
         //todo 启动任务
         env.execute("DwdTrafficUniqueVisitorDetail");
