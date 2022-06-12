@@ -96,7 +96,7 @@ public class DwsTrafficVcChArIsNewPageViewWindow {
         //todo 合并三个流，提取事件时间生成watermark
         DataStream<TrafficPageViewBean> unionDS = trafficPageViewWithUvDS.union(trafficPageViewWithUjDS, trafficPageViewWithPvDS)
                 .assignTimestampsAndWatermarks(WatermarkStrategy
-                        .<TrafficPageViewBean>forBoundedOutOfOrderness(Duration.ofSeconds(2))
+                        .<TrafficPageViewBean>forBoundedOutOfOrderness(Duration.ofSeconds(13))
                         .withTimestampAssigner(new SerializableTimestampAssigner<TrafficPageViewBean>() {
                     @Override
                     public long extractTimestamp(TrafficPageViewBean trafficPageViewBean, long l) {
