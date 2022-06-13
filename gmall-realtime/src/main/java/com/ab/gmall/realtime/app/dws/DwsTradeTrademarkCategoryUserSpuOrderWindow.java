@@ -33,7 +33,15 @@ public class DwsTradeTrademarkCategoryUserSpuOrderWindow {
                     .ts(DateFormatUtil.toTs(json.getString("order_create_time"), true))
                     .build();
         });
+        //todo 关联维表
+        skuUserOrderDS.print(">>>>>");
 
+        //todo 提取时间戳生成watermark
+        //todo 分组开窗聚合
+
+        //todo 将数据写出到ck
+
+        //todo 启动任务
 
     }
 }
