@@ -16,6 +16,7 @@ public class DimUtil {
         Jedis jedis = JedisUtil.getJedis();
         String redisKey = "DIM:" + tableName + ":" + id;
         String dimInfoStr = jedis.get(redisKey);
+
         if (dimInfoStr != null) {
             //重置数据的过期时间
             jedis.expire(redisKey, 24 * 60 * 60);
