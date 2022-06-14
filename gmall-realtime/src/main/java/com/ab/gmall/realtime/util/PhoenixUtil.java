@@ -55,6 +55,12 @@ public class PhoenixUtil {
         try{
             System.out.println("插入语句为：" + sql);
             preparedStatement = conn.prepareStatement(sql);
+
+            //如果当前为更新数据,则需要删除缓存数据
+            if ("update".equals(data.getString("type"))) {
+                DimUtil.delDimInfo(sinkTable.toUpperCase(), data.getJSONObject("data").getString("id"));
+            }
+
             preparedStatement.execute();
             conn.commit();
         } catch (SQLException e) {

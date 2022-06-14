@@ -24,14 +24,17 @@ public class JdbcUtil {
         int columnCount = metaData.getColumnCount();
         //遍历查询到的结果集，将每行数据封装为T对象，并将其放入集合
 
-        while (resultSet.next()){//行遍历
+        while (resultSet.next()) {  //行遍历
+
             //创建T对象
             T t = clz.newInstance();
 
-            for (int i = 0; i < columnCount; i++) {//列遍历
-                String columnName = metaData.getColumnClassName(i + 1);
+            for (int i = 0; i < columnCount; i++) {  //列遍历
+                //获取列名
+                String columnName = metaData.getColumnName(i + 1);
                 //获取列值
                 Object value = resultSet.getObject(columnName);
+
                 //判断是否需要转换列名信息
                 if (underScoreToCamel) {
                     columnName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, columnName.toLowerCase());
@@ -39,11 +42,10 @@ public class JdbcUtil {
 
                 //给T对象赋值
                 BeanUtils.setProperty(t, columnName, value);
-
             }
+
             //将T对象加入集合
             list.add(t);
-
         }
 
 
