@@ -18,7 +18,7 @@ public class ThreadPoolUtil {
                     //创建线程池
                     threadPoolExecutor = new ThreadPoolExecutor(4
                             ,20
-                            , 60
+                            , 100
                             , TimeUnit.SECONDS
                             , new LinkedBlockingDeque<>());//工作队列满了，才会开新的线程，最多到20个
                 }

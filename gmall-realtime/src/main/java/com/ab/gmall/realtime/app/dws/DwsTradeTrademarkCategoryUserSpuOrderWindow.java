@@ -9,6 +9,7 @@ import com.ab.gmall.realtime.util.MyKafkaUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.functions.RichReduceFunction;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
@@ -47,7 +48,7 @@ public class DwsTradeTrademarkCategoryUserSpuOrderWindow {
                     .build();
         });
         //打印测试
-        skuUserOrderDS.print(">>>>>");
+//        skuUserOrderDS.print(">>>>>");
         //todo 关联维表，异步IO方法
         //关联SKU
         SingleOutputStreamOperator<TradeTrademarkCategoryUserSpuOrderBean> withSkuDS = AsyncDataStream.unorderedWait(skuUserOrderDS
@@ -92,7 +93,7 @@ public class DwsTradeTrademarkCategoryUserSpuOrderWindow {
 
                     @Override
                     public void join(TradeTrademarkCategoryUserSpuOrderBean input, JSONObject dimInfo) {
-                        input.setTrademarkId(dimInfo.getString("TM_NAME"));
+                        input.setTrademarkName(dimInfo.getString("TM_NAME"));
                     }
                 }
                 , 60
@@ -150,7 +151,7 @@ public class DwsTradeTrademarkCategoryUserSpuOrderWindow {
                 , TimeUnit.SECONDS);
 
         //打印测试
-        withCategory1DS.print("withCategory1DS>>>>>>>>");
+//        withCategory1DS.print("withCategory1DS>>>>>>>>");
 
         //todo 提取时间戳生成watermark
         SingleOutputStreamOperator<TradeTrademarkCategoryUserSpuOrderBean> tradeTrademarkCategoryUserSpuOrderWithWmDS = withCategory1DS.assignTimestampsAndWatermarks(WatermarkStrategy
@@ -179,7 +180,7 @@ public class DwsTradeTrademarkCategoryUserSpuOrderWindow {
                                 value.getTrademarkName();
                     }
                 }).window(TumblingEventTimeWindows.of(Time.seconds(10)))
-                .reduce(new RichReduceFunction<TradeTrademarkCategoryUserSpuOrderBean>() {
+                .reduce(new ReduceFunction<TradeTrademarkCategoryUserSpuOrderBean>() {
                     @Override
                     public TradeTrademarkCategoryUserSpuOrderBean reduce(TradeTrademarkCategoryUserSpuOrderBean value1, TradeTrademarkCategoryUserSpuOrderBean value2) throws Exception {
                         value1.setOrderCount(value1.getOrderCount() + value2.getOrderCount());
