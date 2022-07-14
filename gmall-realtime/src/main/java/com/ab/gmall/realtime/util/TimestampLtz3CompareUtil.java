@@ -1,6 +1,9 @@
 package com.ab.gmall.realtime.util;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class TimestampLtz3CompareUtil {
 
     public static int compare(String timestamp1, String timestamp2) {
@@ -38,13 +41,15 @@ public class TimestampLtz3CompareUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(compare("2022-04-01 11:10:55.040Z",
-                "2022-04-01 11:10:55.04Z"));
-
-        System.out.println(compare("2022-04-01 11:10:55.040Z",
-                "2022-04-01 11:10:55.1Z"));
-
-        System.out.println(compare("2022-04-01 11:10:55.045Z",
-                "2022-04-01 11:10:55.04Z"));
+//        System.out.println(compare("2022-04-01 11:10:55.040Z",
+//                "2022-04-01 11:10:55.04Z"));
+//
+//        System.out.println(compare("2022-04-01 11:10:55.040Z",
+//                "2022-04-01 11:10:55.1Z"));
+//
+//        System.out.println(compare("2022-04-01 11:10:55.045Z",
+//                "2022-04-01 11:10:55.04Z"));
+        Long inRoomTime = 114697L;
+        System.out.printf("" + Math.round(inRoomTime / 1000.0) + ">>>>>>" + inRoomTime / 1000.0);
     }
 }
